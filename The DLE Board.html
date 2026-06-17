@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Dle Board — find your next daily puzzle</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iMTQiIGZpbGw9IiNGRkZERjciLz48cmVjdCB4PSI2IiB5PSIyMCIgd2lkdGg9IjE2IiBoZWlnaHQ9IjI0IiByeD0iNCIgZmlsbD0iIzVDOUE1QSIvPjxyZWN0IHg9IjI0IiB5PSIyMCIgd2lkdGg9IjE2IiBoZWlnaHQ9IjI0IiByeD0iNCIgZmlsbD0iI0I2OTA0QSIvPjxyZWN0IHg9IjQyIiB5PSIyMCIgd2lkdGg9IjE2IiBoZWlnaHQ9IjI0IiByeD0iNCIgZmlsbD0iIzVDOUE1QSIvPjwvc3ZnPgo=">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --board:#D9CCB3;
+    --board-deep:#C7B894;
+    --paper:#FFFDF7;
+    --ink:#2B2A27;
+    --ink-soft:#6B6457;
+    --tile-green:#5C9A5A;
+    --tile-green-bg:#E3EEDD;
+    --tile-yellow:#B6904A;
+    --tile-yellow-bg:#F6EBD2;
+    --stamp-red:#B5432F;
+    --stamp-red-bg:#F3DEDA;
+    --tape-blue:#3F6E8C;
+    --tape-blue-bg:#DCE7EC;
+    --shadow: 0 6px 14px rgba(43,42,39,0.16), 0 1px 2px rgba(43,42,39,0.12);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background-color:var(--board);
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(43,42,39,0.07) 1px, transparent 1px);
+    background-size: 22px 22px;
+    color:var(--ink);
+    font-family:'Inter', sans-serif;
+    min-height:100vh;
+  }
+
+  a{color:inherit;}
+
+  .wrap{
+    max-width:1100px;
+    margin:0 auto;
+    padding: 28px 20px 64px;
+  }
+
+  /* ---------- Header ---------- */
+  header.top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+    margin-bottom: 28px;
+  }
+
+  .logo{
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+
+  .tiles{
+    display:flex;
+    gap:4px;
+    perspective: 400px;
+  }
+  .tile{
+    width:34px;height:34px;
+    border-radius:6px;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'JetBrains Mono', monospace;
+    font-weight:700;
+    font-size:17px;
+    color:#FFFDF7;
+    box-shadow: inset 0 -2px 0 rgba(0,0,0,0.15);
+    transform: rotateX(90deg);
+    animation: flip-in 0.5s ease-out forwards;
+  }
+  .tile:nth-child(1){background:var(--tile-green); animation-delay:0.05s;}
+  .tile:nth-child(2){background:var(--tile-yellow); animation-delay:0.2s;}
+  .tile:nth-child(3){background:var(--tile-green); animation-delay:0.35s;}
+  @keyframes flip-in{
+    to{ transform: rotateX(0deg); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .tile{ animation: none; transform:none; }
+  }
+
+  .wordmark h1{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:22px;
+    font-weight:700;
+    margin:0;
+    letter-spacing:-0.01em;
+  }
+  .wordmark p{
+    margin:2px 0 0;
+    font-size:13px;
+    color:var(--ink-soft);
+  }
+
+  .count-badge{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12.5px;
+    font-weight:600;
+    background:var(--paper);
+    border:1px solid rgba(43,42,39,0.15);
+    border-radius:999px;
+    padding:7px 14px;
+    box-shadow:var(--shadow);
+    white-space:nowrap;
+  }
+
+  /* ---------- Hero / Daily pick ---------- */
+  .hero{
+    position:relative;
+    background:var(--paper);
+    border-radius:4px;
+    padding:26px 28px 24px;
+    box-shadow: var(--shadow);
+    margin-bottom:30px;
+    transform: rotate(-0.4deg);
+  }
+  .pin{
+    position:absolute;
+    top:-9px; left:34px;
+    width:16px;height:16px;
+    border-radius:50%;
+    background: radial-gradient(circle at 35% 30%, #e8786a, var(--stamp-red));
+    box-shadow: 0 3px 4px rgba(0,0,0,0.35);
+  }
+  .stamp{
+    position:absolute;
+    top:18px; right:26px;
+    border:3px solid var(--stamp-red);
+    color:var(--stamp-red);
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    font-size:13px;
+    letter-spacing:0.12em;
+    padding:5px 12px;
+    border-radius:6px;
+    transform: rotate(7deg);
+    opacity:0.85;
+    text-transform:uppercase;
+  }
+  .hero-eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    margin:0 0 6px;
+  }
+  .hero h2{
+    font-family:'Space Grotesk', sans-serif;
+    font-size: 28px;
+    margin:0 0 8px;
+    max-width:80%;
+  }
+  .hero .cat-pill{
+    display:inline-block;
+    margin-bottom:10px;
+  }
+  .hero p.desc{
+    font-size:15px;
+    color:var(--ink-soft);
+    max-width:560px;
+    margin:0 0 18px;
+    line-height:1.5;
+  }
+  .hero-actions{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    flex-wrap:wrap;
+  }
+  .btn-play{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    font-size:15px;
+    background:var(--ink);
+    color:var(--paper);
+    border:none;
+    border-radius:6px;
+    padding:11px 20px;
+    cursor:pointer;
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    transition: transform 0.12s ease, background 0.12s ease;
+  }
+  .btn-play:hover{ background:#1f1e1c; transform: translateY(-1px); }
+
+  .btn-shuffle{
+    font-family:'Inter',sans-serif;
+    font-size:13.5px;
+    font-weight:500;
+    color:var(--ink-soft);
+    background:none;
+    border:none;
+    cursor:pointer;
+    text-decoration:underline;
+    text-decoration-color: rgba(43,42,39,0.35);
+    padding:4px 0;
+  }
+  .btn-shuffle:hover{ color:var(--ink); }
+
+  .hero-note{
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-top:14px;
+  }
+
+  /* ---------- Controls ---------- */
+  .controls{
+    margin-bottom:22px;
+  }
+  .search-row{
+    display:flex;
+    align-items:center;
+    background:var(--paper);
+    border-radius:8px;
+    box-shadow:var(--shadow);
+    padding:12px 16px;
+    margin-bottom:14px;
+    gap:10px;
+  }
+  .search-row svg{ flex-shrink:0; opacity:0.55; }
+  .search-row input{
+    border:none;
+    outline:none;
+    background:none;
+    font-family:'Inter',sans-serif;
+    font-size:15px;
+    color:var(--ink);
+    width:100%;
+  }
+  .search-row input::placeholder{ color:var(--ink-soft); }
+
+  .chips{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .chip{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12.5px;
+    font-weight:600;
+    border:1px solid rgba(43,42,39,0.18);
+    background:var(--paper);
+    color:var(--ink-soft);
+    border-radius:999px;
+    padding:7px 13px;
+    cursor:pointer;
+    transition: all 0.12s ease;
+    white-space:nowrap;
+  }
+  .chip:hover{ border-color: rgba(43,42,39,0.4); color:var(--ink); }
+  .chip.active{
+    background:var(--ink);
+    color:var(--paper);
+    border-color:var(--ink);
+  }
+
+  /* ---------- Grid of cards ---------- */
+  .grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap:16px;
+  }
+
+  .card{
+    background:var(--paper);
+    border-radius:5px;
+    padding:16px 16px 14px;
+    box-shadow: 0 3px 8px rgba(43,42,39,0.14);
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    border-top:5px solid var(--cat-color, var(--ink-soft));
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+  .card:hover{
+    transform: translateY(-3px);
+    box-shadow: 0 8px 16px rgba(43,42,39,0.2);
+  }
+  .card-top{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:8px;
+  }
+  .card h3{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:16.5px;
+    margin:0;
+    line-height:1.25;
+  }
+  .cat-pill{
+    font-family:'JetBrains Mono', monospace;
+    font-size:10.5px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    padding:3px 8px;
+    border-radius:999px;
+    color: var(--cat-text, var(--ink-soft));
+    background: var(--cat-bg, rgba(43,42,39,0.07));
+    flex-shrink:0;
+  }
+  .card p{
+    margin:0;
+    font-size:13.5px;
+    color:var(--ink-soft);
+    line-height:1.45;
+    flex-grow:1;
+  }
+  .card-link{
+    margin-top:4px;
+    font-family:'Inter',sans-serif;
+    font-size:13.5px;
+    font-weight:600;
+    color:var(--ink);
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+  }
+  .card-link svg{ transition: transform 0.12s ease; }
+  .card:hover .card-link svg{ transform: translate(2px,-2px); }
+
+  .empty-state{
+    text-align:center;
+    padding:50px 20px;
+    color:var(--ink-soft);
+  }
+  .empty-state h3{
+    font-family:'Space Grotesk', sans-serif;
+    color:var(--ink);
+    margin-bottom:6px;
+  }
+
+  footer{
+    text-align:center;
+    margin-top:46px;
+    font-size:12.5px;
+    color:var(--ink-soft);
+  }
+
+  /* focus visibility */
+  button:focus-visible, input:focus-visible, a:focus-visible{
+    outline: 2px solid var(--tape-blue);
+    outline-offset: 2px;
+  }
+
+  @media (max-width: 560px){
+    .hero h2{ max-width:100%; font-size:23px; }
+    .stamp{ display:none; }
+    .grid{ grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 380px){
+    .grid{ grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="top">
+    <div class="logo">
+      <div class="tiles"><div class="tile">D</div><div class="tile">L</div><div class="tile">E</div></div>
+      <div class="wordmark">
+        <h1>The Dle Board</h1>
+        <p>A corkboard of daily puzzle games — search, browse, and play.</p>
+      </div>
+    </div>
+    <div class="count-badge" id="countBadge">199 games · 18 categories</div>
+  </header>
+
+  <section class="hero" id="hero">
+    <div class="pin"></div>
+    <div class="stamp">Today</div>
+    <p class="hero-eyebrow" id="heroDate">—</p>
+    <span class="cat-pill" id="heroCat" style="margin-bottom:10px;"></span>
+    <h2 id="heroName">—</h2>
+    <p class="desc" id="heroDesc">—</p>
+    <div class="hero-actions">
+      <a class="btn-play" id="heroPlay" href="#" target="_blank" rel="noopener noreferrer">Play today's pick →</a>
+      <button class="btn-shuffle" id="heroShuffle">🎲 show me something else instead</button>
+    </div>
+    <p class="hero-note">Today's pick is the same for everyone and changes at midnight, your local time. Great for office-wide picks.</p>
+  </section>
+
+  <section class="controls">
+    <div class="search-row">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      <input type="text" id="searchInput" placeholder="Search by name, category, or description…" autocomplete="off">
+    </div>
+    <div class="chips" id="chipRow"></div>
+  </section>
+
+  <section class="grid" id="grid"></section>
+  <div class="empty-state" id="emptyState" style="display:none;">
+    <h3>No games match that search</h3>
+    <p>Try a different word, or clear the filter to see the full board.</p>
+  </div>
+
+  <footer>Outbound links open the original game's own website in a new tab. Game list is a curated personal selection adapted from The Dles by aukspot, used under the GLP-3.0 license. Not affiliated with any of the games listed.</footer>
+
+</div>
+
+<script>
+  // ---------- Data ----------
+  // [name, url, category, description]
+  const RAW = [
+["NYT Wordle","https://www.nytimes.com/games/wordle/index.html","Words","Guess the 5-letter word in six or fewer attempts."],
+["NYT Connections","https://www.nytimes.com/games/connections","Words","Group words that share a common thread."],
+["NYT Strands","https://www.nytimes.com/games/strands","Words","Find hidden words and uncover the day's theme."],
+["Quordle","https://www.merriam-webster.com/games/quordle/#/","Words","Solve 4 Wordle puzzles at the same time."],
+["Octordle","https://www.britannica.com/games/octordle","Words","Solve 8 Wordle puzzles at once. You get 13 guesses."],
+["Dordle","https://zaratustra.itch.io/dordle","Words","Solve 2 Wordle puzzles at the same time."],
+["Duotrigordle","https://duotrigordle.com","Words","Solve 32 Wordle puzzles at the same time."],
+["Sedecordle","https://sedecordle.com","Words","Solve 16 Wordles at once. You get 21 guesses."],
+["64ordle","https://64ordle.au/?mode=daily","Words","Solve 64 Wordle puzzles at the same time."],
+["Absurdle","https://qntm.org/files/absurdle/absurdle.html","Words","An adversarial Wordle that actively avoids giving you the answer."],
+["Antiwordle","https://www.antiwordle.com","Words","Wordle, except you're trying to avoid the secret word."],
+["Semantle","https://semantle.com","Words","Guess words to see how close they are in meaning to the secret word."],
+["Cemantle","https://cemantle.certitudes.org","Words","The French-language version of Semantle's meaning-guessing format."],
+["Contexto","https://contexto.me","Words","Guess words to see how close they are in context to the secret word."],
+["Redactle","https://redactle.net","Words","Guess the Wikipedia article by its content with keywords redacted."],
+["Crosswordle","https://crosswordle.com","Words","Swap tiles to solve multiple Wordle puzzles crossed together."],
+["Weaver","https://weavergame.org","Words","Weave from the start word to the end word, one letter at a time."],
+["Squareword","https://squareword.org","Words","Guess 5-letter words to uncover a square that reads both ways."],
+["Squardle","https://fubargames.se/squardle","Words","Guesses count in two directions, cycling between three positions."],
+["Waffle","https://wafflegame.net/daily","Words","Swap letters to form words both horizontally and vertically."],
+["Hello Wordl","https://hellowordl.net/?today","Words","Play Wordle with word lengths from 4 to 11 letters."],
+["Lirdle","https://lirdle.com","Words","Wordle, except every line contains a lie."],
+["Fibble","https://fibble.xyz","Words","Wordle, but the game lies to you."],
+["Reversle","https://reversle.net","Words","The reverse of Wordle — you start with the solution and work backwards."],
+["Phrasle","https://phrasle.com","Words","Reveal a hidden phrase by guessing one letter at a time."],
+["Letteripher","https://letteripher.com","Words","Guess letters to reveal a daily category's words before you run out of lives."],
+["Poople","https://poople.io","Words","Find the shortest path from the daily word to the word poop!"],
+["Polygonle","https://www.polygonle.com","Words","Like Wordle, but each shape over a column represents a letter."],
+["Stepwords","https://stepwords.xyz","Words","A word ladder where each step is an anagram of the last, plus a letter."],
+["Six Appeal","https://lex.games/six/","Words","Guess the 6-letter word — your guesses don't have to be real words."],
+["Spelling Bee (Lex)","https://spellsbee.com","Words","Make words from 7 letters, always including the center letter."],
+["Blossom","https://www.merriam-webster.com/games/blossom-word-game","Words","Form 12 words from the petals, always using the center letter."],
+["word.golf","https://word.golf","Words","Link a starting word to a target word through related words."],
+["Wordamid","https://www.wordamid.com","Words","Solve a daily word pyramid by guessing words of increasing length."],
+["Worchle","https://www.worchle.com","Words","Find a hidden keyword in a word search before you run out of guesses."],
+["Decipher","https://decipher.wtf","Words","Solve a daily cryptogram to reveal the hidden quote."],
+["Worldle","https://worldle.teuteuf.fr","Geography","Guess the country by its shape on the world map."],
+["Globle","https://globle-game.com/game","Geography","Guess the mystery country by how close each guess lands to it."],
+["Globle Capitals","https://globle-capitals.com","Geography","Guess the mystery world capital by proximity to each guess."],
+["Flagle","https://www.flagle.io","Geography","Guess the flag in 5 guesses or less."],
+["Flagdle","https://www.flagdle.org","Geography","Guess the country from its flag."],
+["Statele","https://statele.teuteuf.fr","Geography","Guess the US state by its outline on the map."],
+["Travle","https://travle.earth","Geography","Name the countries in between a starting country and an ending one."],
+["WhereTaken","https://wheretaken.teuteuf.fr","Geography","Guess the country or region where a photo was taken."],
+["WhenTaken","https://whentaken.com","Geography","Guess the year and location of a given photo."],
+["Countryle","https://www.countryle.com","Geography","Guess the country in as few attempts as possible using clues."],
+["GeoGrid","https://www.geogridgame.com","Geography","Fill a grid with countries that match each row and column."],
+["TimeGuessr","https://timeguessr.com","Geography","Guess the time and location of historical photographs."],
+["OEC Tradle","https://oec.world/en/games/tradle","Geography","Guess the country by its top exports."],
+["Geodle","https://geodle.me","Geography","Guess today's mystery country within 7 guesses."],
+["Maptap","https://maptap.gg","Geography","Guess 5 locationson a 3D globe."],
+["Neighborle","https://neighborle.com","Geography","Guess the countries that border the highlighted country."],
+["Framed","https://framed.wtf","Movies/TV","Guess the movie from 6 progressively revealed frames."],
+["Moviedle","https://moviedle.xyz","Movies/TV","Guess the movie from clues, each guess revealing what matches."],
+["Box Office Game","https://boxofficega.me","Movies/TV","Guess the top five US box office movies for a given weekend."],
+["Actorle","https://actorle.com","Movies/TV","Guess the actor from clues, each guess revealing what matches."],
+["Cinematrix","https://www.vulture.com/article/daily-movie-grid-trivia-game-cinematrix.html","Movies/TV","Fill a grid with movies matching each row and column. Weekdays."],
+["Showdle","https://showdle.com","Movies/TV","Guess today's TV show by narrowing down its attributes."],
+["Flickle","https://flickle.app","Movies/TV","Guess the movie from short video clips."],
+["Quotesed","https://www.quotesed.com","Movies/TV","Guess the movie from six quotes."],
+["Movie Grid","https://moviegrid.io","Movies/TV","Fill a grid with movies matching each row and column's criteria."],
+["Cine2Nerdle","https://www.cinenerdle2.app","Movies/TV","Group cells into movies and themes, or guess a movie from few clues."],
+["CineLine","https://www.playcineline.com","Movies/TV","Place films in the order they were released."],
+["Plotwords","https://plotwords.com/daily","Movies/TV","Guess a movie using as few plot keywords as possible."],
+["Faces","https://faces.wtf","Movies/TV","Guess the movie stars blended together into one image."],
+["Gaps","https://gaps.wtf","Movies/TV","Guess the movie from blanks and supporting clues."],
+["Harrypotterdle","https://www.harrypotterdle.com","Movies/TV","A collection of daily Harry Potter guessing games."],
+["Heardle Daily","https://www.heardle.info/daily/","Music","Guess the song from short audio clips."],
+["Bandle","https://bandle.app","Music","Guess the song, one instrument at a time."],
+["Spotle","https://spotle.io","Music","Guess the music artist in 10 tries, gaining clues each guess."],
+["Lyricle","https://www.lyricle.app","Music","Guess the song from its lyrics."],
+["Songless","https://lessgames.com/songless","Music","Guess the song from short audio clips."],
+["MusicVidle","https://www.musicvidle.com","Music","Guess the song from frames of its music video."],
+["Heardle 1980's","https://80s.heardledecades.com","Music","Guess an '80s song from short audio clips."],
+["Heardle 2000's","https://00s.heardledecades.com","Music","Guess a 2000s song from short audio clips."],
+["Swiftle","https://www.techyonic.co/swiftle","Music","Listen to a clip and guess the Taylor Swift song."],
+["Harmonies","https://harmonies.io","Music","Find groups of four songs that share a musical theme."],
+["Musicle","https://musicle.app","Music","Match song audio to the correct album art."],
+["Daily Jingle","https://dailyjingle.me","Music","Guess the melody within 5 tries."],
+["Nerdle","https://nerdlegame.com","Math/Logic","Guess the secret arithmetic equation."],
+["Mathler","https://www.mathler.com","Math/Logic","Find the hidden calculation that equals the given number."],
+["Murdle","https://murdle.com","Math/Logic","Solve today's murder-mystery logic puzzle."],
+["Primel","https://converged.yt/primel","Math/Logic","Guess a 5-digit prime number in six guesses or less."],
+["NYT Sudoku","https://www.nytimes.com/puzzles/sudoku","Math/Logic","Daily Sudoku puzzles from the New York Times."],
+["LinkedIn Queens","https://www.linkedin.com/games/queens","Math/Logic","Place queens so exactly one sits in each row, column, and region."],
+["LinkedIn Tango","https://www.linkedin.com/games/tango","Math/Logic","Fill the grid correctly with suns and moons."],
+["Sumplete","https://sumplete.com/daily","Math/Logic","Delete numbers so each row and column hits its target sum."],
+["Numble","https://numble.wtf","Math/Logic","Reach the target number using each given number exactly once."],
+["NYT Pips","https://www.nytimes.com/games/pips","Math/Logic","Fill the board with dominoes that satisfy every condition."],
+["Calcle","https://calclegame.com","Math/Logic","Guess the numbers in an equation in 5 attempts or less."],
+["Zebra Puzzles","https://www.zebrapuzzles.com","Math/Logic","Five daily logic puzzles of increasing difficulty."],
+["Mazele","https://mazele.io","Math/Logic","Guess the correct maze path in 6 tries or less."],
+["Padlock","https://www.padlockgame.net","Math/Logic","A number puzzle inspired by Wordle and Mastermind."],
+["Regexle","https://regexle.com","Math/Logic","Fill a hexagon with sequences matching the regular expressions shown."],
+["Gamedle Classic","https://www.gamedle.wtf/classic","Video Games","Guess the video game by its cover art."],
+["Pokedle","https://pokedle.com","Video Games","Guess the daily Pokémon from all generations."],
+["Squirdle Daily","https://squirdle.fireblend.com/daily.html","Video Games","Guess today's Pokémon within 9 guesses."],
+["Pokedoku","https://pokedoku.com","Video Games","Fill a grid with Pokémon matching each row and column's criteria."],
+["LoLdle","https://loldle.net","Video Games","A set of daily games guessing League of Legends champions."],
+["Guess The Game","https://guessthe.game","Video Games","Guess the video game from cropped screenshots."],
+["Minecraftle","https://minecraftle.zachmanson.com","Video Games","Guess the crafting recipe from Minecraft."],
+["Smashdle","https://smashdle.net","Video Games","Guess the character from Super Smash Bros."],
+["Steamdle","https://steamdle.com","Video Games","Guess the game from a Steam review."],
+["Zeldle","https://zeldle.xyz","Video Games","A collection of daily Zelda guessing games."],
+["Balatrodle","https://www.balatrodle.com","Video Games","Guess the Joker card from the game Balatro."],
+["HowLongToBeat Daily","https://howlongtobeat.com/play","Video Games","Guess how long it takes to beat the given video game."],
+["Genshindle","https://us.genshindle.com/","Video Games","Guess the character from Genshin Impact."],
+["Isaacle","https://isaacle.net","Video Games","Guess items from The Binding of Isaac in daily quizzes."],
+["ZoomOut","https://zoomout.videoludid.com","Video Games","Guess the video game from a zoomed-in screenshot."],
+["Poeltl","https://poeltl.nbpa.com","Sports","Guess the NBA player in 8 guesses."],
+["Weddle","https://www.weddlegame.com","Sports","Guess the NFL player within 8 guesses."],
+["Hoopgrids","https://www.hoopgrids.com","Sports","A daily NBA grid trivia game."],
+["Immaculate Grid: Baseball","https://www.sports-reference.com/immaculate-grid/","Sports","Fill a grid with baseball players matching each row and column."],
+["Immaculate Grid: Football","https://www.sports-reference.com/immaculate-grid/football","Sports","Fill a grid with football players matching each row and column."],
+["Puckdoku","https://www.puckdoku.com","Sports","Fill a grid with hockey players matching each row and column."],
+["MLB Pickle","https://www.mlbpickle.com","Sports","Guess today's mystery MLB player within nine guesses."],
+["NYT Connections: Sports","https://www.nytimes.com/athletic/connections-sports-edition","Sports","Group sports terms that share a common thread."],
+["Futdoku","https://flagdoku.com/futdoku.html","Sports","Fill a grid with soccer players matching each row and column."],
+["Batter Up","https://www.batter-up.app","Sports","Guess the MLB player from a silhouette of their batting stance."],
+["Factle","https://frontofficesports.com/trivia/factle","Trivia","Rank the top 5 answers for a given prompt in 5 guesses."],
+["Daily Tens","https://dailytens.com","Trivia","Guess the top 10 items in today's category."],
+["Quizl","https://quizl.io","Trivia","Answer today's 5 trivia questions."],
+["Pedantle","https://pedantle.certitudes.org","Trivia","Find a secret Wikipedia page by revealing words from its intro."],
+["The Wiki Game Daily","https://www.thewikigamedaily.com","Trivia","Race from one Wikipedia page to a target using the fewest links."],
+["Rankle","https://www.rankle.app","Trivia","Rank six things correctly in four guesses. New category daily."],
+["Concludle","https://tryhardguides.com/concludle","Trivia","Guess a secret answer from a series of clues."],
+["Jeopardy 6","https://www.jeopardy.com/play/j6","Trivia","A weekday Jeopardy game with 12 multiple-choice questions."],
+["Daily Fact or Fiction","https://dailyfactorfiction.com","Trivia","Guess whether today's statement is fact or fiction."],
+["On the Record","https://www.washingtonpost.com/news-quiz","Trivia","Answer a news question based on a given quote."],
+["Birdle","https://www.play-birdle.com","Science/Nature","Identify today's bird in 6 guesses or less."],
+["Metazooa","https://metazooa.com","Science/Nature","Guess animals to find shared ancestry with a mystery animal."],
+["Metaflora","https://flora.metazooa.com","Science/Nature","Guess plants to find shared ancestry with a mystery plant."],
+["Doggle","https://doggle.app","Science/Nature","Guess the breed of the pictured dog."],
+["Elemingle","https://elemingle.com","Science/Nature","Guess today's element by swiping cards."],
+["Doctordle","https://doctordle.org","Science/Nature","Diagnose a patient based on their symptoms and history."],
+["DSMdle","https://dsmdle.com","Science/Nature","Guess the most likely DSM-5 diagnosis based on progressive patient clues."],
+["Chemdle","https://www.chemdle.com","Science/Nature","Solve a daily organic chemistry problem."],
+["Stardle","https://stardlegame.github.io/stardle","Science/Nature","Wordle, where the secret word relates to astronomy."],
+["Yeardle","https://histordle.com/yeardle","History","Guess the year from a set of historical events."],
+["Chronophoto","https://www.chronophoto.app","History","Guess the year each historical picture was taken."],
+["Timdle","https://www.timdle.com","History","Place 8 historical events in chronological order."],
+["Daydle","https://daydle.com","History","Guess the year of an event that happened on this day in history."],
+["Historydle","https://historydle.com","History","Daily games guessing historical people and places."],
+["TimeLine Game","https://www.playtimelines.com","History","Arrange historical events in the order they happened."],
+["Ripple","https://ripplegame.app","History","Guess the ripple effect that followed a historical event."],
+["Past Puzzle","https://www.pastpuzzle.de","History","Guess the correct year of given events in 4 tries."],
+["LinkedIn Zip","https://www.linkedin.com/games/zip","Shapes/Patterns","Connect numbered dots on the grid in order, starting at 1."],
+["Loopy","https://loopy.wtf","Shapes/Patterns","Make a loop based on the numbers in the grid."],
+["DayBrix","https://vole.wtf/daybrix","Shapes/Patterns","A daily tetris-style falling blocks game."],
+["Daydoku","https://www.daydoku.com","Shapes/Patterns","Cover every calendar cell except today's date with polyominoes."],
+["Jigsy","https://jigsy.app","Shapes/Patterns","Fill the grid with shapes you scale and rotate to fit."],
+["VideoPuzzle","https://videopuzzle.org","Shapes/Patterns","Swap tiles to unscramble a looping short video."],
+["Rotaboxes","https://rotaboxes.com","Shapes/Patterns","Rotate tiles into their correct orientation to reveal a picture."],
+["SetFury","https://www.setfury.com","Shapes/Patterns","Find valid sets of 3 to 5 tiles by moving through the grid."],
+["Costcodle","https://costcodle.com","Estimation","Guess the price of a given Costco item."],
+["Angle","https://angle.wtf","Estimation","Guess the angle in 4 guesses or less."],
+["Housle","https://housle.house","Estimation","Guess a house's price from pictures of parts of it."],
+["Brickdle","https://www.brickdle.com","Estimation","Guess the number of pieces in a pictured LEGO set."],
+["Far Out","https://www.faroutquiz.com","Estimation","Three daily estimation trivia questions."],
+["Zonday","https://zonday.app","Estimation","Guess the price of an item from Amazon."],
+["Numblino","https://numblino.com","Estimation","Guess a number based on a given fact, in 6 guesses."],
+["Estimadle","https://estimadle.com","Estimation","Estimate the number of circles on screen within 10 seconds."],
+["Hexcodle","https://www.hexcodle.com","Colors","Guess the 6-digit hex code of a shown color in 5 tries."],
+["Colorfle","https://colorfle.com","Colors","Figure out the color composition of a given color."],
+["ColorGuesser","https://colorguesser.com","Colors","Guess the actual color each color name represents."],
+["Crayondle","https://crayondle.com","Colors","Guess the color of today's crayon."],
+["Chroma","https://robson.plus/chroma","Colors","Match color names to their colors, 5 rounds a day."],
+["Dialed","https://dialed.gg","Colors","See a color for 5 seconds, then try to recreate it."],
+["Chess.com Daily Puzzle","https://www.chess.com/daily-chess-puzzle","Card/Board","Solve the daily chess puzzle from chess.com."],
+["Lichess Daily Puzzle","https://lichess.org/training/daily","Card/Board","Solve the daily chess puzzle from lichess.org."],
+["Chessle","https://jackli.gg/chessle","Card/Board","Guess today's entire opening chess sequence."],
+["Pokle","https://poklegame.com","Card/Board","Guess the 5 board cards in a daily Texas Hold'em challenge."],
+["Really Bad Chess","https://www.puzzmo.com/play/really-bad-chess","Card/Board","Checkmate the opponent's king in a randomized chess variant."],
+["YGOdle","https://www.ygodle.net/","Card/Board","A collection of daily Yu-Gi-Oh! guessing games."],
+["Zaku Chess","https://zakuchess.com","Card/Board","Chess with fantasy pixel-art characters, board rotated 90°."],
+["Matle","https://www.matle.io","Card/Board","Guess the missing chess pieces to match a real checkmate."],
+["Breadle","https://breadle.us","Food","Solve a daily 5-letter word related to food."],
+["Curdle","https://gumbo.systems/curdle/","Food","Guess the cheese from a zoomed-in photo."],
+["Daily Rinds","https://dailyrinds.com","Food","Guess the daily mystery cheese."],
+["FoodGuessr","https://www.foodguessr.com","Food","Guess what country each dish is from."],
+["Scrandle","https://scrandle.com","Food","Guess which stadium food is more popular by picture and price."],
+["Horsle","https://cabletwo.net/horsle/","Novelty","Wordle, except the answer is always Horse."],
+["Jeffgoldblumle","https://jeffgoldblumle.vercel.app","Novelty","Wordle, where the answer is usually Jeff Goldblum."],
+["Coindle","https://muhashi.com/coindle/","Novelty","Get as many coin flips correct in a row as you can, once a day."],
+["Luckle","https://luckle.org","Novelty","Roll dice until they land on the target number, 3 rounds a day."],
+["RNGdle","https://www.rngdle.com","Novelty","Roll a random number and earn points for its patterns."],
+["Cardle","https://cardle.boxbox.autos","Vehicles","Identify a pictured car's make, model, and year."],
+["CarGuesser","https://carguesser.com","Vehicles","Guess a car's brand, model, and year from close-up pictures."],
+["Airport Guessr","https://airportguessr.bytecatch.io/","Vehicles","Guess the airport from its satellite image."],
+["Planespottle","https://planespottle.bytecatch.io","Vehicles","Identify a plane's make, type, and airline from an image."],
+["Artle","https://www.nga.gov/artle.html","Misc","Guess the artist of a shown work of art."],
+["Wallstreetle","https://wallstreetle.com","Misc","Guess the company from clues about its stock."],
+["Facedle","https://facedle.app","Misc","Guess the famous person in a partially covered picture."],
+["Talldle","https://www.talldle.com","Misc","Sort famous people from shortest to tallest."],
+["Am I Dead?","https://www.amidead.gg","Misc","Guess whether each famous face is alive or dead."],
+["Cropple","https://cropple.app","Misc","Guess the subject of a cropped image, or zoom out for hints."],
+["Guess The Book","https://guessthebook.app","Misc","Guess the book from short snippets and details."],
+["Guess The Logo","https://guessthelogo.wtf","Misc","Guess a logo that becomes less blurry with each guess."],
+["Picsey","https://picsey.io","Misc","Identify today's picture by flipping as few tiles as possible."],
+["Bibdle","https://bibdle.com","Misc","Guess the daily verse from the Bible."],
+["Spot The Differences","https://www.spot-differences.com","Misc","Spot every difference between two pictures."],
+["Minigolfle","https://minigolfle.com","Misc","A 2D retro mini-golf game with 3 random levels each day."]
+  ];
+
+  const GROUP = {
+    "Words":"A","Math/Logic":"A","Shapes/Patterns":"A","Card/Board":"A",
+    "Geography":"B","Science/Nature":"B","History":"B","Estimation":"B","Vehicles":"B",
+    "Movies/TV":"C","Music":"C","Video Games":"C","Sports":"C",
+    "Trivia":"D","Novelty":"D","Colors":"D","Food":"D","Misc":"D"
+  };
+  const GROUP_VARS = {
+    A: {color:"var(--tile-green)", bg:"var(--tile-green-bg)", text:"var(--tile-green)"},
+    B: {color:"var(--tape-blue)",  bg:"var(--tape-blue-bg)",  text:"var(--tape-blue)"},
+    C: {color:"var(--stamp-red)",  bg:"var(--stamp-red-bg)",  text:"var(--stamp-red)"},
+    D: {color:"var(--tile-yellow)",bg:"var(--tile-yellow-bg)",text:"var(--tile-yellow)"}
+  };
+
+  const GAMES = RAW.map(([name, url, category, desc]) => ({name, url, category, desc}));
+
+  // ---------- Render: chips ----------
+  const categories = [...new Set(GAMES.map(g => g.category))].sort();
+  const chipRow = document.getElementById('chipRow');
+  let activeCat = "All";
+
+  function buildChips(){
+    chipRow.innerHTML = "";
+    const all = document.createElement('button');
+    all.className = 'chip active';
+    all.textContent = `All (${GAMES.length})`;
+    all.dataset.cat = "All";
+    chipRow.appendChild(all);
+    categories.forEach(cat => {
+      const n = GAMES.filter(g => g.category === cat).length;
+      const chip = document.createElement('button');
+      chip.className = 'chip';
+      chip.textContent = `${cat} (${n})`;
+      chip.dataset.cat = cat;
+      chipRow.appendChild(chip);
+    });
+    chipRow.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        activeCat = chip.dataset.cat;
+        chipRow.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        renderGrid();
+      });
+    });
+  }
+
+  // ---------- Render: grid ----------
+  const grid = document.getElementById('grid');
+  const emptyState = document.getElementById('emptyState');
+  const searchInput = document.getElementById('searchInput');
+  const countBadge = document.getElementById('countBadge');
+
+  function cardHTML(g){
+    const gv = GROUP_VARS[GROUP[g.category]] || GROUP_VARS.D;
+    return `
+      <article class="card" style="--cat-color:${gv.color}; --cat-bg:${gv.bg}; --cat-text:${gv.text};">
+        <div class="card-top">
+          <h3>${g.name}</h3>
+        </div>
+        <span class="cat-pill">${g.category}</span>
+        <p>${g.desc}</p>
+        <a class="card-link" href="${g.url}" target="_blank" rel="noopener noreferrer">
+          Play ${g.name}
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M9 7h8v8"/></svg>
+        </a>
+      </article>`;
+  }
+
+  function renderGrid(){
+    const q = searchInput.value.trim().toLowerCase();
+    const filtered = GAMES.filter(g => {
+      const inCat = activeCat === "All" || g.category === activeCat;
+      const inSearch = !q || (g.name + " " + g.category + " " + g.desc).toLowerCase().includes(q);
+      return inCat && inSearch;
+    });
+    grid.innerHTML = filtered.map(cardHTML).join("");
+    emptyState.style.display = filtered.length ? "none" : "block";
+    countBadge.textContent = (activeCat === "All" && !q)
+      ? `${GAMES.length} games · ${categories.length} categories`
+      : `Showing ${filtered.length} of ${GAMES.length}`;
+  }
+
+  searchInput.addEventListener('input', renderGrid);
+
+  // ---------- Daily pick (date-seeded, same for everyone all day) ----------
+  function dailySeed(){
+    const d = new Date();
+    const key = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+    let hash = 0;
+    for (let i = 0; i < key.length; i++){
+      hash = (hash * 31 + key.charCodeAt(i)) >>> 0;
+    }
+    return hash;
+  }
+
+  function pickGame(seed){
+    return GAMES[seed % GAMES.length];
+  }
+
+  function showHeroGame(game){
+    const gv = GROUP_VARS[GROUP[game.category]] || GROUP_VARS.D;
+    document.getElementById('heroName').textContent = game.name;
+    document.getElementById('heroDesc').textContent = game.desc;
+    const catEl = document.getElementById('heroCat');
+    catEl.textContent = game.category;
+    catEl.style.setProperty('--cat-bg', gv.bg);
+    catEl.style.setProperty('--cat-text', gv.text);
+    catEl.style.background = gv.bg;
+    catEl.style.color = gv.text;
+    const playBtn = document.getElementById('heroPlay');
+    playBtn.href = game.url;
+    playBtn.textContent = `Play ${game.name} →`;
+  }
+
+  function initDaily(){
+    const today = new Date();
+    document.getElementById('heroDate').textContent =
+      today.toLocaleDateString(undefined, { weekday:'long', month:'long', day:'numeric' });
+    showHeroGame(pickGame(dailySeed()));
+  }
+
+  document.getElementById('heroShuffle').addEventListener('click', () => {
+    const randomSeed = Math.floor(Math.random() * GAMES.length);
+    showHeroGame(pickGame(randomSeed));
+  });
+
+  // ---------- Init ----------
+  buildChips();
+  renderGrid();
+  initDaily();
+</script>
+
+</body>
+</html>

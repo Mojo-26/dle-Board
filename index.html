@@ -335,6 +335,32 @@
   .card-link svg{ transition: transform 0.12s ease; }
   .card:hover .card-link svg{ transform: translate(2px,-2px); }
 
+  .fav-btn{
+    flex-shrink:0;
+    background:none;
+    border:none;
+    cursor:pointer;
+    font-size:20px;
+    line-height:1;
+    color: rgba(43,42,39,0.28);
+    padding:0;
+    transition: color 0.12s ease, transform 0.12s ease;
+  }
+  .fav-btn:hover{ color: var(--tile-yellow); transform: scale(1.18); }
+  .fav-btn.is-fav{ color: var(--tile-yellow); }
+
+  .fav-toggle{
+    display:inline-block;
+    margin-bottom:10px;
+    border-color: var(--tile-yellow);
+    color: var(--tile-yellow);
+  }
+  .fav-toggle.active{
+    background: var(--tile-yellow);
+    color: var(--paper);
+    border-color: var(--tile-yellow);
+  }
+
   .empty-state{
     text-align:center;
     padding:50px 20px;
@@ -403,6 +429,7 @@
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
       <input type="text" id="searchInput" placeholder="Search by name, category, or description…" autocomplete="off">
     </div>
+    <button class="chip fav-toggle" id="favToggle">☆ Favorites (0)</button>
     <div class="chips" id="chipRow"></div>
   </section>
 
@@ -412,7 +439,7 @@
     <p>Try a different word, or clear the filter to see the full board.</p>
   </div>
 
-  <footer>Outbound links open the original game's own website in a new tab. Game list is a curated personal selection adapted from The Dles by aukspot, used under the GLP-3.0 license. Not affiliated with any of the games listed.</footer>
+  <footer>Outbound links open the original game's own website in a new tab. Game list adapted from <a href="https://github.com/aukspot/dles" target="_blank" rel="noopener noreferrer">The Dles</a> by aukspot, used under the <a href="https://github.com/aukspot/dles/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">GPL-3.0 license</a>. Not affiliated with any of the games listed.</footer>
 
 </div>
 
@@ -446,7 +473,6 @@
 ["Reversle","https://reversle.net","Words","The reverse of Wordle — you start with the solution and work backwards."],
 ["Phrasle","https://phrasle.com","Words","Reveal a hidden phrase by guessing one letter at a time."],
 ["Letteripher","https://letteripher.com","Words","Guess letters to reveal a daily category's words before you run out of lives."],
-["Poople","https://poople.io","Words","Find the shortest path from the daily word to the word poop!"],
 ["Polygonle","https://www.polygonle.com","Words","Like Wordle, but each shape over a column represents a letter."],
 ["Stepwords","https://stepwords.xyz","Words","A word ladder where each step is an anagram of the last, plus a letter."],
 ["Six Appeal","https://lex.games/six/","Words","Guess the 6-letter word — your guesses don't have to be real words."],
@@ -470,7 +496,6 @@
 ["TimeGuessr","https://timeguessr.com","Geography","Guess the time and location of historical photographs."],
 ["OEC Tradle","https://oec.world/en/games/tradle","Geography","Guess the country by its top exports."],
 ["Geodle","https://geodle.me","Geography","Guess today's mystery country within 7 guesses."],
-["Maptap","https://maptap.gg","Geography","Guess 5 locationson a 3D globe."],
 ["Neighborle","https://neighborle.com","Geography","Guess the countries that border the highlighted country."],
 ["Framed","https://framed.wtf","Movies/TV","Guess the movie from 6 progressively revealed frames."],
 ["Moviedle","https://moviedle.xyz","Movies/TV","Guess the movie from clues, each guess revealing what matches."],
@@ -555,7 +580,7 @@
 ["Doggle","https://doggle.app","Science/Nature","Guess the breed of the pictured dog."],
 ["Elemingle","https://elemingle.com","Science/Nature","Guess today's element by swiping cards."],
 ["Doctordle","https://doctordle.org","Science/Nature","Diagnose a patient based on their symptoms and history."],
-["DSMdle","https://dsmdle.com","Science/Nature","Guess the most likely DSM-5 diagnosis based on progressive patient clues."],
+["DSMdle","https://www.dsmdle.com/","Science/Nature","Guess the DSM-5 diagnosis from a patient case, one clue at a time."],
 ["Chemdle","https://www.chemdle.com","Science/Nature","Solve a daily organic chemistry problem."],
 ["Stardle","https://stardlegame.github.io/stardle","Science/Nature","Wordle, where the secret word relates to astronomy."],
 ["Yeardle","https://histordle.com/yeardle","History","Guess the year from a set of historical events."],
@@ -581,6 +606,7 @@
 ["Far Out","https://www.faroutquiz.com","Estimation","Three daily estimation trivia questions."],
 ["Zonday","https://zonday.app","Estimation","Guess the price of an item from Amazon."],
 ["Numblino","https://numblino.com","Estimation","Guess a number based on a given fact, in 6 guesses."],
+["Estimadle","https://estimadle.com","Estimation","Estimate the number of circles on screen within 10 seconds."],
 ["Hexcodle","https://www.hexcodle.com","Colors","Guess the 6-digit hex code of a shown color in 5 tries."],
 ["Colorfle","https://colorfle.com","Colors","Figure out the color composition of a given color."],
 ["ColorGuesser","https://colorguesser.com","Colors","Guess the actual color each color name represents."],
@@ -676,10 +702,13 @@
 
   function cardHTML(g){
     const gv = GROUP_VARS[GROUP[g.category]] || GROUP_VARS.D;
+    const faved = favorites.has(g.name);
+    const safeName = g.name.replace(/"/g, '&quot;');
     return `
       <article class="card" style="--cat-color:${gv.color}; --cat-bg:${gv.bg}; --cat-text:${gv.text};">
         <div class="card-top">
           <h3>${g.name}</h3>
+          <button class="fav-btn ${faved ? 'is-fav' : ''}" data-name="${safeName}" aria-label="${faved ? 'Remove from favorites' : 'Add to favorites'}" title="${faved ? 'Remove from favorites' : 'Add to favorites'}">${faved ? '★' : '☆'}</button>
         </div>
         <span class="cat-pill">${g.category}</span>
         <p>${g.desc}</p>
@@ -692,19 +721,63 @@
 
   function renderGrid(){
     const q = searchInput.value.trim().toLowerCase();
-    const filtered = GAMES.filter(g => {
+    let filtered = GAMES.filter(g => {
       const inCat = activeCat === "All" || g.category === activeCat;
       const inSearch = !q || (g.name + " " + g.category + " " + g.desc).toLowerCase().includes(q);
-      return inCat && inSearch;
+      const inFav = !favoritesOnly || favorites.has(g.name);
+      return inCat && inSearch && inFav;
     });
+    // Favorited games float to the top, original order preserved within each group
+    filtered.sort((a, b) => (favorites.has(b.name) ? 1 : 0) - (favorites.has(a.name) ? 1 : 0));
     grid.innerHTML = filtered.map(cardHTML).join("");
     emptyState.style.display = filtered.length ? "none" : "block";
-    countBadge.textContent = (activeCat === "All" && !q)
+    countBadge.textContent = (activeCat === "All" && !q && !favoritesOnly)
       ? `${GAMES.length} games · ${categories.length} categories`
       : `Showing ${filtered.length} of ${GAMES.length}`;
   }
 
   searchInput.addEventListener('input', renderGrid);
+
+  // ---------- Favorites (saved per-browser, no account needed) ----------
+  const FAV_KEY = 'dleboard:favorites';
+  let favoritesOnly = false;
+
+  function loadFavorites(){
+    try {
+      const raw = localStorage.getItem(FAV_KEY);
+      return new Set(raw ? JSON.parse(raw) : []);
+    } catch (e){
+      return new Set(); // storage blocked/unavailable; favorites just won't persist
+    }
+  }
+  function saveFavorites(){
+    try { localStorage.setItem(FAV_KEY, JSON.stringify([...favorites])); }
+    catch (e){ /* storage unavailable, nothing to do */ }
+  }
+  let favorites = loadFavorites();
+
+  const favToggle = document.getElementById('favToggle');
+  function updateFavToggleLabel(){
+    favToggle.textContent = `${favoritesOnly ? '★' : '☆'} Favorites (${favorites.size})`;
+  }
+  favToggle.addEventListener('click', () => {
+    favoritesOnly = !favoritesOnly;
+    favToggle.classList.toggle('active', favoritesOnly);
+    updateFavToggleLabel();
+    renderGrid();
+  });
+
+  grid.addEventListener('click', (e) => {
+    const btn = e.target.closest('.fav-btn');
+    if (!btn) return;
+    e.preventDefault();
+    const name = btn.dataset.name;
+    if (favorites.has(name)) favorites.delete(name);
+    else favorites.add(name);
+    saveFavorites();
+    updateFavToggleLabel();
+    renderGrid();
+  });
 
   // ---------- Daily pick (date-seeded, same for everyone all day) ----------
   function dailySeed(){
@@ -750,6 +823,7 @@
 
   // ---------- Init ----------
   buildChips();
+  updateFavToggleLabel();
   renderGrid();
   initDaily();
 </script>

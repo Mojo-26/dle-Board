@@ -2,6 +2,8 @@
 
 A personal corkboard-style hub for daily puzzle games in the "dle" family — Wordle-likes, geography guessers, music games, logic puzzles, and more. Search, browse, star your favorites, and discover something new every day.
 
+Play it here (DLE-Board)[https://mojo-26.github.io/dle-Board/]
+
 ---
 
 ## What it is
